@@ -9,7 +9,7 @@ namespace DesktopSwitch
   {
     public readonly static WindowManager WindowManager = new WindowManager();
 
-    public static AppContext AppContext;
+    public static AppContext Context;
     public static KeyboardManager KeyboardManager;
 
     [STAThread]
@@ -20,13 +20,11 @@ namespace DesktopSwitch
       
       AddHotkeys(); // creates a native window
 
-      AppContext = new AppContext();
-
-      AddAppMenu();
-      
-      Application.Run(AppContext);
-
-      AppContext.Dispose();
+      using (Context = new AppContext())
+      {
+        AddAppMenu();
+        Application.Run(Context);
+      }
 
 //      Application.EnableVisualStyles();
 //      Application.SetCompatibleTextRenderingDefault(false);
@@ -35,33 +33,20 @@ namespace DesktopSwitch
 
     private static void AddAppMenu()
     {
-      AppContext.AddMenuItem("Desctops/One", () =>
-      {
-        WindowManager.SwitchToDesctop(0);
-        AppContext.SetIcon(Resources.TrayIconNumber1);
-      });
-      AppContext.AddMenuItem("Desctops/Two", () =>
-      {
-        WindowManager.SwitchToDesctop(1);
-        AppContext.SetIcon(Resources.TrayIconNumber2);
-      });
-
-      AppContext.AddMenuItem("Exit", Application.Exit);
+      Context.AddMenuItem("Desctops/One", () => WindowManager.SwitchToDesctop(0));
+      Context.AddMenuItem("Desctops/Two", () => WindowManager.SwitchToDesctop(1));
+      Context.AddMenuItem("Exit", Application.Exit);
     }
 
     private static void AddHotkeys()
     {
       KeyboardManager = new KeyboardManager(); // creates a native window
-      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D1, () =>
-      {
-        WindowManager.SwitchToDesctop(0);
-        AppContext.SetIcon(Resources.TrayIconNumber1);
-      });
-      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D2, () =>
-      {
-        WindowManager.SwitchToDesctop(1);
-        AppContext.SetIcon(Resources.TrayIconNumber2);
-      });
+
+      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D1, () => WindowManager.SwitchToDesctop(0));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D2, () => WindowManager.SwitchToDesctop(1));
+      
+      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D1, () => { WindowManager.MoveWindow(0); });
+      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D2, () => { WindowManager.MoveWindow(1); });
 
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.Oemtilde, ConsoleUi.ToggleConsole);
     }
