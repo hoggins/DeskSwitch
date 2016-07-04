@@ -60,10 +60,10 @@ namespace DesktopSwitch
         if (IsWindowVisible(hWnd) && string.IsNullOrEmpty(strTitle) == false)
         {
           // debug filter
-          int processId;
-          GetWindowThreadProcessId(hWnd, out processId);
-          if (Process.GetProcessById(processId).ProcessName != "notepad")
-            return true;
+//          int processId;
+//          GetWindowThreadProcessId(hWnd, out processId);
+//          if (Process.GetProcessById(processId).ProcessName != "notepad")
+//            return true;
 
           ConsoleUi.WriteLine(strTitle);
           collection.Add(hWnd);
