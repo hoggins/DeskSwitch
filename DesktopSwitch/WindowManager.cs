@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -40,12 +41,42 @@ namespace DesktopSwitch
       var toShow = targetWnds.Where(t => !currentWnds.Contains(t));
 
       CurrentDesctop = idx;
+      UpdateIcon();
 
       foreach (var ptr in toHide)
         ShowWindow(ptr, SW_HIDE);
 
       foreach (var ptr in toShow)
         ShowWindow(ptr, SW_SHOW);
+    }
+
+    private void UpdateIcon()
+    {
+      Icon icon;
+      switch (CurrentDesctop)
+      {
+        case 0: icon = Resources.TrayIconNumber1; break;
+        case 1: icon = Resources.TrayIconNumber2; break;
+        case 2: icon = Resources.TrayIconNumber3; break;
+        case 3: icon = Resources.TrayIconNumber4; break;
+        default:
+          throw new ArgumentOutOfRangeException(string.Format("Can't switch to desctop {0} because it doesn't have icon", CurrentDesctop));
+      }
+      AppController.Context.SetIcon(icon);
+    }
+
+    public void MoveWindow(int idx, bool clone = false)
+    {
+      if (idx == CurrentDesctop && idx < 0 && idx >= DesktopsCount)
+        return;
+
+      var hWnd = GetForegroundWindow();
+      if (hWnd == IntPtr.Zero)
+        return;
+
+      _windowsByDesktop[idx].Add(hWnd);
+      if (!clone)
+        ShowWindow(hWnd, SW_HIDE);
     }
 
     public static HashSet<IntPtr> GetActiveWindows()
@@ -93,22 +124,8 @@ namespace DesktopSwitch
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int processId);
 
-    private static HashSet<IntPtr> GetActiveWindows1()
-    {
-      var openWindowProcesses = System.Diagnostics.Process.GetProcesses()
-        .Where(p => p.MainWindowHandle != IntPtr.Zero && p.ProcessName != "explorer");
-
-      openWindowProcesses = openWindowProcesses.Where(p => p.ProcessName == "notepad");
-
-      ConsoleUi.WriteLine(string.Join("\r\n", openWindowProcesses.Select(p => p.MainWindowTitle)));
-      return new HashSet<IntPtr>(openWindowProcesses.Select(p=>p.MainWindowHandle));
-    }
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool AllocConsole();
-
-    [DllImport("kernel32.dll")]
-    static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")]
+    static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
     static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
