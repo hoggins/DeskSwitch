@@ -7,7 +7,7 @@ namespace DesktopSwitch
 {
   class AppController
   {
-    public readonly static WindowManager WindowManager = new WindowManager();
+    public static WindowManager WindowManager;
 
     public static AppContext Context;
     public static KeyboardManager KeyboardManager;
@@ -20,6 +20,7 @@ namespace DesktopSwitch
       
       AddHotkeys(); // creates a native window
 
+      using(WindowManager = new WindowManager())
       using (Context = new AppContext())
       {
         AddAppMenu();
@@ -44,9 +45,18 @@ namespace DesktopSwitch
 
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D1, () => WindowManager.SwitchToDesctop(0));
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D2, () => WindowManager.SwitchToDesctop(1));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D3, () => WindowManager.SwitchToDesctop(3));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D4, () => WindowManager.SwitchToDesctop(4));
       
-      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D1, () => { WindowManager.MoveWindow(0); });
-      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D2, () => { WindowManager.MoveWindow(1); });
+      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D1, () => WindowManager.MoveWindow(0));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D2, () => WindowManager.MoveWindow(1));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D3, () => WindowManager.MoveWindow(2));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D4, () => WindowManager.MoveWindow(3));
+      
+      KeyboardManager.AddHotkey(ModifierKeys.Control | ModifierKeys.Shift, Keys.D1, () => WindowManager.MoveWindow(0, true));
+      KeyboardManager.AddHotkey(ModifierKeys.Control | ModifierKeys.Shift, Keys.D2, () => WindowManager.MoveWindow(1, true));
+      KeyboardManager.AddHotkey(ModifierKeys.Control | ModifierKeys.Shift, Keys.D3, () => WindowManager.MoveWindow(2, true));
+      KeyboardManager.AddHotkey(ModifierKeys.Control | ModifierKeys.Shift, Keys.D4, () => WindowManager.MoveWindow(3, true));
 
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.Oemtilde, ConsoleUi.ToggleConsole);
     }

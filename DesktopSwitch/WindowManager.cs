@@ -8,7 +8,7 @@ using System.Text;
 
 namespace DesktopSwitch
 {
-  public class WindowManager
+  public class WindowManager : IDisposable
   {
     public const int DesktopsCount = 4;
     public int CurrentDesctop { get; private set; }
@@ -106,16 +106,32 @@ namespace DesktopSwitch
       return collection;
     }
 
+    public void Dispose()
+    {
+      var allHandlers = new HashSet<IntPtr>();
+
+      foreach (var handlers in _windowsByDesktop)
+        foreach (var handler in handlers)
+          allHandlers.Add(handler);
+
+      foreach (var ptr in allHandlers)
+        ShowWindow(ptr, SW_SHOW);
+    }
+
+    #region Native imports
+
     public delegate bool EnumDelegate(IntPtr hWnd, int lParam);
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool IsWindowVisible(IntPtr hWnd);
 
-    [DllImport("user32.dll", EntryPoint = "GetWindowText", ExactSpelling = false, CharSet = CharSet.Auto, SetLastError = true)]
+    [DllImport("user32.dll", EntryPoint = "GetWindowText", ExactSpelling = false, CharSet = CharSet.Auto,
+      SetLastError = true)]
     public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpWindowText, int nMaxCount);
 
-    [DllImport("user32.dll", EntryPoint = "EnumDesktopWindows", ExactSpelling = false, CharSet = CharSet.Auto, SetLastError = true)]
+    [DllImport("user32.dll", EntryPoint = "EnumDesktopWindows", ExactSpelling = false, CharSet = CharSet.Auto,
+      SetLastError = true)]
     public static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumDelegate lpEnumCallbackFunction, IntPtr lParam);
 
 //    [DllImport("user32.dll", SetLastError = true)]
@@ -125,12 +141,15 @@ namespace DesktopSwitch
     public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int processId);
 
     [DllImport("user32.dll")]
-    static extern IntPtr GetForegroundWindow();
+    private static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
-    static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-    const int SW_HIDE = 0;
-    const int SW_SHOW = 5;
+    private const int SW_HIDE = 0;
+    private const int SW_SHOW = 5;
+
+    #endregion
+
   }
 }
