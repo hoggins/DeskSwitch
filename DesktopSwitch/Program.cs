@@ -45,8 +45,8 @@ namespace DesktopSwitch
 
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D1, () => WindowManager.SwitchToDesctop(0));
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D2, () => WindowManager.SwitchToDesctop(1));
-      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D3, () => WindowManager.SwitchToDesctop(3));
-      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D4, () => WindowManager.SwitchToDesctop(4));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D3, () => WindowManager.SwitchToDesctop(2));
+      KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D4, () => WindowManager.SwitchToDesctop(3));
       
       KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D1, () => WindowManager.MoveWindow(0));
       KeyboardManager.AddHotkey(ModifierKeys.Alt | ModifierKeys.Shift, Keys.D2, () => WindowManager.MoveWindow(1));
