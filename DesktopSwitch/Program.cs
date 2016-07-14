@@ -59,8 +59,9 @@ namespace DesktopSwitch
       KeyboardManager.AddHotkey(ModifierKeys.Control | ModifierKeys.Shift, Keys.D4, () => WindowManager.MoveWindow(3, true));
 
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.Oemtilde, ConsoleUi.ToggleConsole);
-    }
 
+      KeyboardManager.AddHotkey(ModifierKeys.None, Keys.LaunchMail, () => ProcessManager.StartApp("calc.exe")); // my keybord doesn't have Calc button :(
+    }
 
     private static void AddCommands()
     {

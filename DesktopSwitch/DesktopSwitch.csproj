@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="KeyboardHook.cs" />
     <Compile Include="KeyboardManager.cs" />
+    <Compile Include="ProcessManaged.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
