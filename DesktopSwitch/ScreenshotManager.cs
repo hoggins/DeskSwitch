@@ -55,24 +55,26 @@ namespace DesktopSwitch
 
       _screenshot = TakeScreenshot();
 
-      _wndThread = new Thread(() =>
-      {
-        _form = new ScreenshotForm();
-        _form.Bounds = Screen.PrimaryScreen.Bounds;
-        if (Settings.IsFullscreen)
-        {
-          _form.BackColor = Color.White;
-          _form.FormBorderStyle = FormBorderStyle.None;
-          _form.TopMost = true;
-        }
-        _form.Controller = this;
-        _form.Screenshot = _screenshot;
-        _form.Show(AppController.Context.MainForm);
-
-        Application.EnableVisualStyles();
-        Application.Run(_form);
-      });
+      _wndThread = new Thread(StartForm);
       _wndThread.Start();
+    }
+
+    private void StartForm()
+    {
+      _form = new ScreenshotForm();
+      _form.Bounds = Screen.PrimaryScreen.Bounds;
+      if (Settings.IsFullscreen)
+      {
+        _form.BackColor = Color.White;
+        _form.FormBorderStyle = FormBorderStyle.None;
+        _form.TopMost = true;
+      }
+      _form.Controller = this;
+      _form.Screenshot = _screenshot;
+      _form.Show(AppController.Context.MainForm);
+
+      Application.EnableVisualStyles();
+      Application.Run(_form);
     }
 
     public void AbortCapturing()
@@ -121,7 +123,25 @@ namespace DesktopSwitch
       Bitmap cropped = (Bitmap)_screenshot.Clone(rect, _screenshot.PixelFormat);
       cropped.Save(fileName, ImageFormat.Png);
 
+      SetClipboardFile(fileName);
+
       AbortCapturing();
+    }
+
+    private void SetClipboardFile(string fileName)
+    {
+      System.Collections.Specialized.StringCollection FileCollection = new System.Collections.Specialized.StringCollection();
+
+
+      FileCollection.Add(fileName);
+
+
+      
+        // close the form on the forms thread
+        //form.Close();
+      //  Clipboard.SetFileDropList(FileCollection);
+      
+
     }
 
     private string GetOutFileName()
