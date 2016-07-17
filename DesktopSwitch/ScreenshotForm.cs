@@ -67,7 +67,8 @@ namespace DesktopSwitch
 
     private void SaveBtn_Click(object sender, EventArgs e)
     {
-      Controller.Save(ToRectangle(_clipFrom.Value, _clipTo.Value))
+      if (_clipFrom.HasValue && _clipTo.HasValue)
+        Controller.Save(ToRectangle(_clipFrom.Value, _clipTo.Value));
     }
 
     private void CancelBtn_Click(object sender, EventArgs e)

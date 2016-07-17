@@ -8,18 +8,38 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace DesktopSwitch
 {
+  public class ScreenshotSettings
+  {
+    [JsonProperty] public string OutputPath;
+  }
+
   public class ScreenshotManager
   {
     private const bool IsFullscreen = false;
 
     public bool IsCapturing;
 
+    private readonly Lazy<ScreenshotSettings> _settings = AppController.Settings.GetOrNew<ScreenshotSettings>();
+    private ScreenshotSettings Settings { get { return _settings.Value; } }
+
     private Thread _wndThread;
     private Bitmap _screenshot;
     private ScreenshotForm _form;
+
+    public void Initialize()
+    {
+      if (Settings.OutputPath == null)
+      {
+        using (var settings = AppController.Settings.GetEditContext<ScreenshotSettings>())
+        {
+          settings.Value.OutputPath = Application.StartupPath;
+        }
+      }
+    }
 
     public void StartCaptureMode()
     {
@@ -88,6 +108,16 @@ namespace DesktopSwitch
       bmpScreenCapture.Save("test.png", ImageFormat.Png);
 
       return bmpScreenCapture;
+    }
+
+    public void Save(Rectangle rect)
+    {
+      var fileName = GetOutFileName();
+    }
+
+    private string GetOutFileName()
+    {
+      return "test.png";
     }
   }
 

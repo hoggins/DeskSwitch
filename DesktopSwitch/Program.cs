@@ -8,6 +8,7 @@ namespace DesktopSwitch
 {
   class AppController
   {
+    public static SettingsManager Settings;
     public static WindowManager WindowManager;
 
     public static AppContext Context;
@@ -22,12 +23,17 @@ namespace DesktopSwitch
 
     private static void Initialize()
     {
+      Settings = new SettingsManager();
+      Settings.Init("app.config");
+
+
       ConsoleUi.InitConsole(); // allocate console before any windown created
       
       ScreenshotManager = new ScreenshotManager();
       using (WindowManager = new WindowManager())
       using (Context = new AppContext())
       {
+        ScreenshotManager.Initialize();
 
         AddCommands();
         AddHotkeys(); // creates a native window
