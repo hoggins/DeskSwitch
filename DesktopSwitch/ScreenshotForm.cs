@@ -73,7 +73,7 @@ namespace DesktopSwitch
 
     private void CancelBtn_Click(object sender, EventArgs e)
     {
-
+      Controller.AbortCapturing();
     }
 
     private void HideUi()

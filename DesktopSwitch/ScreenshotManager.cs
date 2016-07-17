@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,12 +16,11 @@ namespace DesktopSwitch
   public class ScreenshotSettings
   {
     [JsonProperty] public string OutputPath;
+    [JsonProperty] public bool IsFullscreen = false;
   }
 
   public class ScreenshotManager
   {
-    private const bool IsFullscreen = false;
-
     public bool IsCapturing;
 
     private readonly Lazy<ScreenshotSettings> _settings = AppController.Settings.GetOrNew<ScreenshotSettings>();
@@ -30,15 +30,21 @@ namespace DesktopSwitch
     private Bitmap _screenshot;
     private ScreenshotForm _form;
 
+    private const string FilePrefix = "Screenshot_";
+    private const string FileExtension = ".png";
+
     public void Initialize()
     {
-      if (Settings.OutputPath == null)
-      {
-        using (var settings = AppController.Settings.GetEditContext<ScreenshotSettings>())
-        {
-          settings.Value.OutputPath = Application.StartupPath;
-        }
-      }
+      TryInitDefaults();
+    }
+
+    private void TryInitDefaults()
+    {
+      if (Settings.OutputPath != null)
+        return;
+
+      using (var settings = AppController.Settings.GetEditContext<ScreenshotSettings>())
+        settings.Value.OutputPath = Application.StartupPath;
     }
 
     public void StartCaptureMode()
@@ -53,12 +59,13 @@ namespace DesktopSwitch
       {
         _form = new ScreenshotForm();
         _form.Bounds = Screen.PrimaryScreen.Bounds;
-        if (IsFullscreen)
+        if (Settings.IsFullscreen)
         {
           _form.BackColor = Color.White;
           _form.FormBorderStyle = FormBorderStyle.None;
           _form.TopMost = true;
         }
+        _form.Controller = this;
         _form.Screenshot = _screenshot;
         _form.Show(AppController.Context.MainForm);
 
@@ -68,7 +75,7 @@ namespace DesktopSwitch
       _wndThread.Start();
     }
 
-    private void AbortCapturing()
+    public void AbortCapturing()
     {
       if (_form != null)
       {
@@ -101,11 +108,9 @@ namespace DesktopSwitch
       var bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
 
       using (Graphics g = Graphics.FromImage(bmpScreenCapture))
-      {
-        //g.CopyFromScreen(0, 0, Screen.PrimaryScreen.Bounds.X,Screen.PrimaryScreen.Bounds.Y,bmpScreenCapture.Size,CopyPixelOperation.SourceCopy);
         g.CopyFromScreen(0, 0, 0, 0, bmpScreenCapture.Size, CopyPixelOperation.SourceCopy);
-      }
-      bmpScreenCapture.Save("test.png", ImageFormat.Png);
+
+      bmpScreenCapture.Save("raw.png", ImageFormat.Png);
 
       return bmpScreenCapture;
     }
@@ -113,11 +118,26 @@ namespace DesktopSwitch
     public void Save(Rectangle rect)
     {
       var fileName = GetOutFileName();
+      Bitmap cropped = (Bitmap)_screenshot.Clone(rect, _screenshot.PixelFormat);
+      cropped.Save(fileName, ImageFormat.Png);
+
+      AbortCapturing();
     }
 
     private string GetOutFileName()
     {
-      return "test.png";
+      var files = Directory.GetFiles(Settings.OutputPath).Select(Path.GetFileName).Where(f=>f.StartsWith(FilePrefix) && f.EndsWith(FileExtension));
+      var usedIds = files.Select(ParseFileId).ToList();
+      var lastId = usedIds.Any() ? usedIds.Max() : 0;
+      return Path.Combine(Settings.OutputPath, string.Concat(FilePrefix, lastId+1, FileExtension));
+    }
+
+    private int ParseFileId(string fileName)
+    {
+      var valStr = fileName.Substring(FilePrefix.Length, fileName.Length - FilePrefix.Length - FileExtension.Length);
+      int val;
+      int.TryParse(valStr, out val);
+      return val;
     }
   }
 
