@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using DeploymentUtil.Utils;
 using InteractiveConsole;
@@ -11,25 +12,33 @@ namespace DesktopSwitch
 
     public static AppContext Context;
     public static KeyboardManager KeyboardManager;
+    public static ScreenshotManager ScreenshotManager;
 
     [STAThread]
     static void Main(string[] args)
     {
-      ConsoleUi.InitConsole(); // allocate console before any windown created
-      AddCommands();
-      
-      AddHotkeys(); // creates a native window
+      Initialize();
+    }
 
-      using(WindowManager = new WindowManager())
+    private static void Initialize()
+    {
+      ConsoleUi.InitConsole(); // allocate console before any windown created
+      
+      ScreenshotManager = new ScreenshotManager();
+      using (WindowManager = new WindowManager())
       using (Context = new AppContext())
       {
+
+        AddCommands();
+        AddHotkeys(); // creates a native window
         AddAppMenu();
+
         Application.Run(Context);
       }
 
-//      Application.EnableVisualStyles();
-//      Application.SetCompatibleTextRenderingDefault(false);
-//      Application.Run(new Form1());
+      //      Application.EnableVisualStyles();
+      //      Application.SetCompatibleTextRenderingDefault(false);
+      //      Application.Run(new Form1());
     }
 
     private static void AddAppMenu()
@@ -77,6 +86,12 @@ namespace DesktopSwitch
         .Method(cx =>
         {
           WindowManager.SwitchToDesctop(cx.Required<int>("id"));
+        });
+
+      ConsoleUi.AddCommand("scr", "make a screenshot")
+        .Method(cx =>
+        {
+          ScreenshotManager.StartCaptureMode();
         });
     }
   }
