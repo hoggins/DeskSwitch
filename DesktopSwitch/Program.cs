@@ -95,12 +95,6 @@ namespace DesktopSwitch
         {
           WindowManager.SwitchToDesctop(cx.Required<int>("id"));
         });
-
-      ConsoleUi.AddCommand("scr", "make a screenshot")
-        .Method(cx =>
-        {
-          ScreenshotManager.StartCaptureMode();
-        });
     }
   }
 }

@@ -36,6 +36,7 @@ namespace DesktopSwitch
     public void Initialize()
     {
       TryInitDefaults();
+      AddAdminCommands();
     }
 
     private void TryInitDefaults()
@@ -158,6 +159,30 @@ namespace DesktopSwitch
       int val;
       int.TryParse(valStr, out val);
       return val;
+    }
+
+    public void SetupOutputPath(string path)
+    {
+      var dialog = new FolderBrowserDialog();
+      if (dialog.ShowDialog() != DialogResult.OK)
+        return;
+
+      using (var settings = AppController.Settings.GetEditContext<ScreenshotSettings>())
+        settings.Value.OutputPath = dialog.SelectedPath;
+    }
+
+    public void AddAdminCommands()
+    {
+      ConsoleUi.AddCommand("scr", "make a screenshot")
+        .Method(cx =>
+        {
+          StartCaptureMode();
+        });
+      ConsoleUi.AddCommand("scr_setup", "setup output folder")
+        .Method(cx =>
+        {
+          SetupOutputPath(null);
+        });
     }
   }
 
