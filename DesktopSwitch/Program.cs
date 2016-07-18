@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Windows.Forms;
 using DeploymentUtil.Utils;
@@ -78,6 +79,8 @@ namespace DesktopSwitch
       KeyboardManager.AddHotkey(ModifierKeys.Control, Keys.PrintScreen, ()=>ScreenshotManager.StartCaptureMode());
 
       KeyboardManager.AddHotkey(ModifierKeys.None, Keys.LaunchMail, () => ProcessManager.StartApp("calc.exe")); // my keybord doesn't have Calc button :(
+
+      KeyboardManager.AddHotkey(ModifierKeys.None, Keys.Sleep, LockWorkStation); // todo guess what is proper name of top left button on my keyboard
     }
 
     private static void AddCommands()
@@ -96,5 +99,8 @@ namespace DesktopSwitch
           WindowManager.SwitchToDesctop(cx.Required<int>("id"));
         });
     }
+
+    [DllImport("user32")]
+    public static extern void LockWorkStation();
   }
 }
