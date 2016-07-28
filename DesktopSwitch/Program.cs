@@ -10,9 +10,11 @@ namespace DesktopSwitch
   class AppController
   {
     public static SettingsManager Settings;
+    public static AppContext Context;
+
+
     public static WindowManager WindowManager;
 
-    public static AppContext Context;
     public static KeyboardManager KeyboardManager;
     public static ScreenshotManager ScreenshotManager;
 
@@ -24,6 +26,11 @@ namespace DesktopSwitch
 
     private static void Initialize()
     {
+//      Application.EnableVisualStyles();
+//      Application.SetCompatibleTextRenderingDefault(false);
+//      Application.Run(new Form1());
+//      return;
+
       Settings = new SettingsManager();
       Settings.Init("app.config");
 
@@ -43,10 +50,6 @@ namespace DesktopSwitch
 
         Application.Run(Context);
       }
-
-      //      Application.EnableVisualStyles();
-      //      Application.SetCompatibleTextRenderingDefault(false);
-      //      Application.Run(new Form1());
     }
 
     private static void AddAppMenu()
@@ -79,8 +82,8 @@ namespace DesktopSwitch
       KeyboardManager.AddHotkey(ModifierKeys.Control, Keys.PrintScreen, ()=>ScreenshotManager.StartCaptureMode());
 
       KeyboardManager.AddHotkey(ModifierKeys.None, Keys.LaunchMail, () => ProcessManager.StartApp("calc.exe")); // my keybord doesn't have Calc button :(
-
-      KeyboardManager.AddHotkey(ModifierKeys.None, Keys.Sleep, LockWorkStation); // todo guess what is proper name of top left button on my keyboard
+      KeyboardManager.AddHotkey(ModifierKeys.None, (Keys)172, () => ProcessManager.StartApp("cmd.exe"));
+      KeyboardManager.AddHotkey(ModifierKeys.None, (Keys)168, LockWorkStation);
     }
 
     private static void AddCommands()
