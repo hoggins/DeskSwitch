@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -126,7 +127,14 @@ namespace DesktopSwitch
 
       SetClipboardFile(fileName);
 
+      ShowInFolder(fileName);
+
       AbortCapturing();
+    }
+
+    private void ShowInFolder(string fileName)
+    {
+      Process.Start("explorer.exe", Path.GetDirectoryName(fileName));
     }
 
     private void SetClipboardFile(string fileName)
