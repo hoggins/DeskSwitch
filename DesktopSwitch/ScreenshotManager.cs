@@ -64,12 +64,14 @@ namespace DesktopSwitch
     private void StartForm()
     {
       _form = new ScreenshotForm();
-      _form.Bounds = Screen.PrimaryScreen.Bounds;
+      _form.Bounds = GetScreenBoundingBox();
       if (Settings.IsFullscreen)
       {
-        _form.BackColor = Color.White;
-        _form.FormBorderStyle = FormBorderStyle.None;
         _form.TopMost = true;
+//        _form.WindowState = FormWindowState.Maximized;
+//        _form.FormBorderStyle = FormBorderStyle.None;
+        _form.FormBorderStyle = FormBorderStyle.Sizable;
+        _form.BackColor = Color.White;
       }
       _form.Controller = this;
       _form.Screenshot = _screenshot;
@@ -77,6 +79,29 @@ namespace DesktopSwitch
 
       Application.EnableVisualStyles();
       Application.Run(_form);
+    }
+
+    private static Rectangle GetScreenBoundingBox()
+    {
+      var bb = GetGlobalScreenRect(Screen.AllScreens[0].Bounds);
+      var minX = bb.Left;
+      var maxX = bb.Right;
+      var minY = bb.Top;
+      var maxY = bb.Bottom;
+      foreach (var screen in Screen.AllScreens)
+      {
+        bb = GetGlobalScreenRect(screen.Bounds);
+        if (minX > bb.Left) minX = bb.Left;
+        if (maxX < bb.Right) maxX = bb.Right;
+        if (minY > bb.Top) minY = bb.Top;
+        if (maxY > bb.Bottom) maxY = bb.Bottom;
+      }
+      return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    private static Rectangle GetGlobalScreenRect(Rectangle rect)
+    {
+      return new Rectangle(rect.Location.X, rect.Location.Y, rect.Width, rect.Height);
     }
 
     public void AbortCapturing()
@@ -109,7 +134,8 @@ namespace DesktopSwitch
     public static Bitmap TakeScreenshot()
     {
       //http://stackoverflow.com/questions/5049122/capture-the-screen-shot-using-net
-      var bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+      var screenBb = GetScreenBoundingBox();
+      var bmpScreenCapture = new Bitmap(screenBb.Width, screenBb.Height);
 
       using (Graphics g = Graphics.FromImage(bmpScreenCapture))
         g.CopyFromScreen(0, 0, 0, 0, bmpScreenCapture.Size, CopyPixelOperation.SourceCopy);
