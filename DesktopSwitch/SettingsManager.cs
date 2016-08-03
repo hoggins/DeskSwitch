@@ -26,7 +26,8 @@ namespace DesktopSwitch
     {
       return new Lazy<T>(() =>
       {
-        return _settings[typeof (T).Name].ToObject<T>() ?? new T();
+        var jToken = _settings[typeof (T).Name];
+        return jToken != null ? jToken.ToObject<T>() : new T();
       });
     }
 

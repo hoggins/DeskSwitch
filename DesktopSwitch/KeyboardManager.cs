@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using DeploymentUtil.Utils;
 
 namespace DesktopSwitch
 {
   public class KeyboardManager : IDisposable
   {
-    private readonly KeyboardHook _keyboard;
     private readonly Dictionary<long, List<Action>> _hotkeys = new Dictionary<long, List<Action>>();
+    private int _currentId;
 
-    public KeyboardManager()
+    public void Initialize()
     {
-      _keyboard = new KeyboardHook();
-      _keyboard.KeyPressed += GlobalKeyPressed;
+      AppController.PompWnd.MessageArrived += OnMessageArrived;
     }
 
     public void AddHotkey(ModifierKeys modifier, Keys key, Action action)
@@ -24,29 +23,54 @@ namespace DesktopSwitch
         _hotkeys.Add(idx, actions = new List<Action>());
       actions.Add(action);
 
-      // note: this call may fail because KeyboardHook is init yet
-      _keyboard.RegisterHotKey(modifier, key);
+      if (!RegisterHotKey(AppController.PompWnd.Handle, ++_currentId, (uint)modifier, (uint)key))
+        ConsoleUi.WriteLine("Fail to register hotkey {0}({1}) {2}({3})", modifier, (uint)modifier, key, (uint)key);
     }
 
-    private void GlobalKeyPressed(object sender, KeyPressedEventArgs e)
+    public void Dispose()
     {
-      var idx = MakeIndex(e.Modifier, e.Key);
+      for (int i = _currentId; i > 0; i--)
+        UnregisterHotKey(AppController.PompWnd.Handle, i);
+    }
+
+    private void OnMessageArrived(Message m)
+    {
+      if (m.Msg != MessagePompWnd.WM_HOTKEY)
+        return;
+
+      var modifier = (ModifierKeys)((int)m.LParam & 0xFFFF);
+      var key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);
+      GlobalKeyPressed(MakeIndex(modifier, key));
+    }
+
+    private void GlobalKeyPressed(long keyIdx)
+    {
       List<Action> actions;
-      if (!_hotkeys.TryGetValue(idx, out actions))
+      if (!_hotkeys.TryGetValue(keyIdx, out actions))
         return;
 
       for (int i = actions.Count - 1; i >= 0; i--)
         actions[i].Invoke();
     }
 
-    public void Dispose()
-    {
-      _keyboard.Dispose();
-    }
-
     private static long MakeIndex(ModifierKeys modifier, Keys key)
     {
       return ((long) modifier << 32) | (int) key;
     }
+
+    [DllImport("user32.dll")]
+    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+    [DllImport("user32.dll")]
+    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+  }
+
+  [Flags]
+  public enum ModifierKeys : uint
+  {
+    None = 0,
+    Alt = 1,
+    Control = 2,
+    Shift = 4,
+    Win = 8
   }
 }

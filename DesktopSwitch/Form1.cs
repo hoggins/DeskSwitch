@@ -21,7 +21,6 @@ namespace DesktopSwitch
 
     private void Form1_Load(object sender, EventArgs e)
     {
-
     }
 
     private void HandleKeyDown(object sender, KeyEventArgs e)

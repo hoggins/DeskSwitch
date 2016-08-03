@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Windows.Forms;
-using DeploymentUtil.Utils;
 using InteractiveConsole;
 
 namespace DesktopSwitch
@@ -13,6 +12,7 @@ namespace DesktopSwitch
     public static AppContext Context;
 
 
+    public static MessagePompWnd PompWnd;
     public static WindowManager WindowManager;
 
     public static KeyboardManager KeyboardManager;
@@ -36,11 +36,15 @@ namespace DesktopSwitch
 
 
       ConsoleUi.InitConsole(); // allocate console before any windown created
+
       
       ScreenshotManager = new ScreenshotManager();
+      using (KeyboardManager = new KeyboardManager())
       using (WindowManager = new WindowManager())
       using (Context = new AppContext())
+      using (PompWnd = new MessagePompWnd())
       {
+        KeyboardManager.Initialize();
         ScreenshotManager.Initialize();
 
         AddCommands();
@@ -61,8 +65,6 @@ namespace DesktopSwitch
 
     private static void AddHotkeys()
     {
-      KeyboardManager = new KeyboardManager(); // creates a native window
-
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D1, () => WindowManager.SwitchToDesctop(0));
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D2, () => WindowManager.SwitchToDesctop(1));
       KeyboardManager.AddHotkey(ModifierKeys.Alt, Keys.D3, () => WindowManager.SwitchToDesctop(2));
