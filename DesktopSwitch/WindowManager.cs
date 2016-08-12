@@ -67,7 +67,7 @@ namespace DesktopSwitch
 
     public void MoveWindow(int idx, bool clone = false)
     {
-      if (idx == CurrentDesctop && idx < 0 && idx >= DesktopsCount)
+      if (idx == CurrentDesctop || (idx < 0 && idx >= DesktopsCount))
         return;
 
       var hWnd = GetForegroundWindow();
